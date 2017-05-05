@@ -1,4 +1,4 @@
-{-|
+{-,
 Module      : Data.RDF.Parser.Turtle
 Description : Representation and Incremental Processing of RDF Data
 Copyright   : Fabian Meyer 2017
@@ -17,10 +17,8 @@ module Data.RDF.Parser.Turtle () where
 import qualified Data.Attoparsec.Text      as A
 import qualified Data.Attoparsec.Text.Lazy as AL
 
-import Data.RDF.Types
-import Data.RDF.Parser.Common
-
 import qualified Data.Text.Lazy as TL
+import Data.Monoid
 
 -- [1]	turtleDoc	::=	statement*
 -- [2]	statement	::=	directive | triples '.'
@@ -71,6 +69,22 @@ import qualified Data.Text.Lazy as TL
 -- [167s]	PN_PREFIX	::=	PN_CHARS_BASE ((PN_CHARS | '.')* PN_CHARS)?
 -- [168s]	PN_LOCAL	::=	(PN_CHARS_U | ':' | [0-9] | PLX) ((PN_CHARS | '.' | ':' | PLX)* (PN_CHARS | ':' | PLX))?
 -- [169s]	PLX	::=	PERCENT | PN_LOCAL_ESC
+
+
 -- [170s]	PERCENT	::=	'%' HEX HEX
+percent = do
+  per <- TL.singleton <$> AL.char '%'
+  a <- TL.singleton <$> hex
+  b <- TL.singleton <$> hex
+  return $ per <> a <> b
+
 -- [171s]	HEX	::=	[0-9] | [A-F] | [a-f]
+hex :: A.Parser Char
+hex = AL.choice $ AL.char <$> ['0' .. '9'] <> ['A' .. 'F'] <> ['a' .. 'f']
+
 -- [172s]	PN_LOCAL_ESC	::=	'\' ('_' | '~' | '.' | '-' | '!' | '$' | '&' | "'" | '(' | ')' | '*' | '+' | ',' | ';' | '=' | '/' | '?' | '#' | '@' | '%')
+pnLocalEsc :: A.Parser TL.Text
+pnLocalEsc = do
+  esc <- TL.singleton <$> AL.char '\\'
+  c <- TL.singleton <$> AL.choice (AL.char <$> ['_', '~', '.', '-', '!', '$', '&', '\'', '(' , ')', '*', '+', ',', ';', '=', '/', '?', '#', '@', '%'])
+  return $ esc <> c
