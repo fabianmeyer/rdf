@@ -25,6 +25,7 @@ library
                     , Data.RDF.Graph
                     , Data.RDF.Parser.Common
                     , Data.RDF.Parser.NQuads
+                    , Data.RDF.Parser.Turtle
                     , Data.RDF.ToRDF
   other-modules:      Data.RDF.Internal
   build-depends:      base >=4.8 && < 5.0
@@ -53,6 +54,16 @@ benchmark bench-rdf
                     , text
     ghc-options:      -rtsopts
     default-language: Haskell2010
+
+test-suite turtleparser
+  type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
+  main-is:             Spec.hs
+  build-depends:       base
+                     , rdf
+                     , QuickCheck
+  ghc-options:         -Wall -threaded -rtsopts -with-rtsopts=-N
+  default-language:    Haskell2010
 
 source-repository head
     type:             git
